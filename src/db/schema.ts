@@ -101,6 +101,8 @@ export const piezas = pgTable('piezas', {
   tipo: tipoPieza('tipo').notNull(),
   estado: estadoPieza('estado').notNull().default('borrador'),
   versionActual: integer('version_actual').notNull().default(1),
+  produccionPara: text('produccion_para'),
+  fechaProduccion: date('fecha_produccion'),
   creadaPor: uuid('creada_por').notNull().references(() => perfiles.id),
   creadaEn: timestamp('creada_en', { withTimezone: true }).notNull().defaultNow(),
   actualizadaEn: timestamp('actualizada_en', { withTimezone: true }).notNull().defaultNow(),
