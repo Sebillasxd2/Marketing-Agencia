@@ -1,6 +1,6 @@
 import { cache } from 'react'
 import { redirect } from 'next/navigation'
-import { eq } from 'drizzle-orm'
+import { and, eq } from 'drizzle-orm'
 import { createClient } from '@/lib/supabase/server'
 import { db } from '@/db'
 import { miembrosAgencia, perfiles } from '@/db/schema'
@@ -30,7 +30,7 @@ export const getUsuario = cache(async (): Promise<UsuarioActual | null> => {
     })
     .from(miembrosAgencia)
     .innerJoin(perfiles, eq(perfiles.id, miembrosAgencia.perfilId))
-    .where(eq(miembrosAgencia.perfilId, user.id))
+    .where(and(eq(miembrosAgencia.perfilId, user.id), eq(miembrosAgencia.activo, true)))
     .limit(1)
 
   const m = rows[0]
