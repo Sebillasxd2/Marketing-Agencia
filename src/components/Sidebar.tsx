@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard,
+  ClipboardList,
   FileText,
   Users,
   AtSign,
@@ -18,6 +19,7 @@ type Item = { href: string; label: string; icon: LucideIcon; roles: Rol[] }
 
 const items: Item[] = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['jefa', 'empleado'] },
+  { href: '/reportes', label: 'Reportes', icon: ClipboardList, roles: ['jefa', 'empleado'] },
   { href: '/contratos', label: 'Contratos', icon: FileText, roles: ['jefa', 'empleado'] },
   { href: '/trabajadores', label: 'Trabajadores', icon: Users, roles: ['jefa'] },
   { href: '/cuentas', label: 'Cuentas', icon: AtSign, roles: ['jefa', 'empleado'] },

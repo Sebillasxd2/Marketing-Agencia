@@ -2,7 +2,8 @@ import { and, eq } from 'drizzle-orm'
 import { requireUsuario, type UsuarioActual } from '@/lib/dal'
 import { db } from '@/db'
 import { piezas, miembrosAgencia, perfiles, reportesDiarios } from '@/db/schema'
-import { estadoMeta, tipoLabel } from '@/lib/estados'
+import { tipoLabel } from '@/lib/estados'
+import { hoyISO } from '@/lib/fecha'
 
 export default async function DashboardPage() {
   const u = await requireUsuario()
@@ -27,7 +28,7 @@ async function DashboardJefa({ u }: { u: UsuarioActual }) {
   const reportesHoy = await db
     .select()
     .from(reportesDiarios)
-    .where(and(eq(reportesDiarios.agenciaId, u.agenciaId), eq(reportesDiarios.fecha, '2026-06-10')))
+    .where(and(eq(reportesDiarios.agenciaId, u.agenciaId), eq(reportesDiarios.fecha, hoyISO())))
   const reporto = new Set(reportesHoy.map((r) => r.empleadoId))
 
   return (
