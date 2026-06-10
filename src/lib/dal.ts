@@ -43,6 +43,6 @@ export const getUsuario = cache(async (): Promise<UsuarioActual | null> => {
 export const requireUsuario = cache(async (rol?: Rol): Promise<UsuarioActual> => {
   const u = await getUsuario()
   if (!u) redirect('/login')
-  if (rol && u.rol !== rol) redirect(u.rol === 'jefa' ? '/jefa' : '/empleado')
+  if (rol && u.rol !== rol) redirect('/dashboard')
   return u
 })

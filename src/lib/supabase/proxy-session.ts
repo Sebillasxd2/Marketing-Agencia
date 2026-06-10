@@ -31,7 +31,8 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser()
 
   const path = request.nextUrl.pathname
-  const esProtegida = path.startsWith('/jefa') || path.startsWith('/empleado')
+  const protegidas = ['/dashboard', '/contratos', '/trabajadores', '/cuentas', '/estadisticas', '/contenido', '/ajustes']
+  const esProtegida = protegidas.some((p) => path === p || path.startsWith(p + '/'))
 
   if (!user && esProtegida) {
     const url = request.nextUrl.clone()

@@ -11,7 +11,7 @@ const cuentas = [
 
 export default async function LoginPage() {
   const u = await getUsuario()
-  if (u) redirect(u.rol === 'jefa' ? '/jefa' : '/empleado')
+  if (u) redirect('/dashboard')
 
   return (
     <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center gap-8 px-6 py-12">
