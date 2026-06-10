@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { requireUsuario } from '@/lib/dal'
 import { NicknameForm } from './NicknameForm'
+import { ThemeToggle } from '@/components/ThemeToggle'
 
 export default async function AjustesPage() {
   const u = await requireUsuario()
@@ -24,10 +25,7 @@ export default async function AjustesPage() {
       </Card>
 
       <Card titulo="Tema" descripcion="Apariencia de la plataforma.">
-        <span className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm">Claro</span>
-        <span className="ml-3 text-xs text-gray-400">
-          El modo oscuro se activará en todas las secciones de una vez, para que se vea consistente.
-        </span>
+        <ThemeToggle />
       </Card>
     </div>
   )

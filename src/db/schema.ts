@@ -25,6 +25,7 @@ export const tipoContenidoVersion = pgEnum('tipo_contenido_version', [
 export const colorRevision = pgEnum('color_revision', ['verde', 'amarillo', 'rojo'])
 export const estadoReporte = pgEnum('estado_reporte', ['pendiente', 'enviado'])
 export const estadoContrato = pgEnum('estado_contrato', ['activo', 'pausado', 'finalizado'])
+export const plataformaRed = pgEnum('plataforma_red', ['facebook', 'instagram', 'tiktok', 'youtube', 'otro'])
 export const tipoNotificacion = pgEnum('tipo_notificacion', [
   'pieza_en_revision', 'pieza_decidida', 'reporte_recordatorio', 'reporte_recibido',
 ])
@@ -196,6 +197,18 @@ export const notificaciones = pgTable('notificaciones', {
   piezaId: uuid('pieza_id').references(() => piezas.id),
   mensaje: text('mensaje').notNull(),
   leida: boolean('leida').notNull().default(false),
+  creadaEn: timestamp('creada_en', { withTimezone: true }).notNull().defaultNow(),
+})
+
+// Cuentas de redes (FB/IG/TikTok…) por organización.
+export const cuentas = pgTable('cuentas', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  agenciaId: uuid('agencia_id').notNull().references(() => agencias.id),
+  clienteId: uuid('cliente_id').notNull().references(() => clientes.id),
+  plataforma: plataformaRed('plataforma').notNull(),
+  usuario: text('usuario').notNull(),
+  url: text('url'),
+  notas: text('notas'),
   creadaEn: timestamp('creada_en', { withTimezone: true }).notNull().defaultNow(),
 })
 
