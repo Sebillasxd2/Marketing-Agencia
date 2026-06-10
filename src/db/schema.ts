@@ -24,6 +24,7 @@ export const tipoContenidoVersion = pgEnum('tipo_contenido_version', [
 ])
 export const colorRevision = pgEnum('color_revision', ['verde', 'amarillo', 'rojo'])
 export const estadoReporte = pgEnum('estado_reporte', ['pendiente', 'enviado'])
+export const estadoContrato = pgEnum('estado_contrato', ['activo', 'pausado', 'finalizado'])
 export const tipoNotificacion = pgEnum('tipo_notificacion', [
   'pieza_en_revision', 'pieza_decidida', 'reporte_recordatorio', 'reporte_recibido',
 ])
@@ -68,7 +69,13 @@ export const clientes = pgTable('clientes', {
   id: uuid('id').primaryKey().defaultRandom(),
   agenciaId: uuid('agencia_id').notNull().references(() => agencias.id),
   nombre: text('nombre').notNull(),
+  rubro: text('rubro'),
   ciudad: text('ciudad'),
+  contacto: text('contacto'),
+  telefono: text('telefono'),
+  inicioContrato: date('inicio_contrato'),
+  tarifaMensual: numeric('tarifa_mensual'),
+  estadoContrato: estadoContrato('estado_contrato').notNull().default('activo'),
   notasMarca: text('notas_marca'),
   activo: boolean('activo').notNull().default(true),
   creadoEn: timestamp('creado_en', { withTimezone: true }).notNull().defaultNow(),
