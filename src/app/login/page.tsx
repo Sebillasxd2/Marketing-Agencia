@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { getUsuario } from '@/lib/dal'
 import { accesoRapido } from './actions'
 import { LoginForm } from './LoginForm'
+import { Logo } from '@/components/Logo'
 
 const cuentas = [
   { email: 'alejandra@vertice.demo', nombre: 'Alejandra', rol: 'Jefa', desc: 'Revisa y aprueba con el semáforo' },
@@ -15,9 +16,9 @@ export default async function LoginPage() {
 
   return (
     <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center gap-8 px-6 py-12">
-      <div className="text-center">
-        <h1 className="text-3xl font-semibold tracking-tight">Vértice</h1>
-        <p className="mt-2 text-sm text-gray-500">Control de calidad para tu agencia.</p>
+      <div className="flex flex-col items-center gap-3 text-center">
+        <Logo size={40} />
+        <p className="text-sm text-gray-500">El centro de mando de tu agencia de marketing.</p>
       </div>
 
       <div className="space-y-3">

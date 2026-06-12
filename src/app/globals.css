@@ -2,19 +2,31 @@
 
 :root {
   color-scheme: light;
+  --brand: #4f46e5; /* indigo-600 */
+  --brand-hover: #4338ca; /* indigo-700 */
 }
 .dark {
   color-scheme: dark;
+  --brand: #6366f1; /* indigo-500 */
+  --brand-hover: #818cf8; /* indigo-400 */
 }
 
 body {
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
 }
 
-/* ── Modo oscuro ──────────────────────────────────────────────────────────
-   Remapeo de las utilidades neutrales que usa la app. Los acentos de color
-   (verde/ámbar/rojo/azul/morado) se dejan tal cual: lucen bien sobre oscuro. */
+/* Helpers de marca */
+.text-brand { color: var(--brand); }
+.bg-brand { background-color: var(--brand); }
+.border-brand { border-color: var(--brand); }
+.bg-brand-soft { background-color: color-mix(in srgb, var(--brand) 14%, transparent); }
 
+/* Rebrand: el primario (bg-gray-900) y sus hovers pasan al color de marca */
+.bg-gray-900 { background-color: var(--brand); }
+.hover\:bg-gray-800:hover { background-color: var(--brand-hover); }
+.file\:bg-gray-900::file-selector-button { background-color: var(--brand); }
+
+/* ── Modo oscuro: neutrales ───────────────────────────────────────────── */
 .dark .bg-white { background-color: #18181b; }
 .dark .bg-gray-50 { background-color: #0b0b0d; }
 .dark .bg-gray-100 { background-color: #27272a; }
@@ -35,12 +47,6 @@ body {
 .dark .text-gray-400 { color: #71717a; }
 .dark .text-gray-300 { color: #52525b; }
 
-/* Botón primario / item de navegación activo */
-.dark .bg-gray-900 { background-color: #3f3f46; }
-.dark .hover\:bg-gray-800:hover { background-color: #52525b; }
-.dark .file\:bg-gray-900::file-selector-button { background-color: #3f3f46; }
-
-/* Inputs */
 .dark input,
 .dark textarea,
 .dark select {
@@ -51,6 +57,5 @@ body {
   color: #71717a;
 }
 
-/* Tarjeta ámbar ("necesita atención") */
 .dark .bg-amber-50 { background-color: rgba(245, 158, 11, 0.12); }
 .dark .border-amber-300 { border-color: rgba(245, 158, 11, 0.4); }

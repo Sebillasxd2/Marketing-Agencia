@@ -13,6 +13,7 @@ import {
   Settings,
   type LucideIcon,
 } from 'lucide-react'
+import { Logo } from '@/components/Logo'
 
 type Rol = 'jefa' | 'empleado'
 type Item = { href: string; label: string; icon: LucideIcon; roles: Rol[] }
@@ -33,7 +34,9 @@ export function Sidebar({ rol }: { rol: Rol }) {
 
   return (
     <aside className="flex w-60 shrink-0 flex-col border-r border-gray-200 bg-white">
-      <div className="flex h-14 items-center px-6 text-lg font-semibold tracking-tight">Vértice</div>
+      <div className="flex h-14 items-center px-5">
+        <Logo />
+      </div>
       <nav className="flex-1 space-y-1 px-3 py-2">
         {items
           .filter((i) => i.roles.includes(rol))
@@ -45,7 +48,7 @@ export function Sidebar({ rol }: { rol: Rol }) {
                 key={i.href}
                 href={i.href}
                 className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition ${
-                  active ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-100'
+                  active ? 'bg-gray-900 font-medium text-white shadow-sm' : 'text-gray-600 hover:bg-gray-100'
                 }`}
               >
                 <Icon size={18} />
@@ -54,7 +57,7 @@ export function Sidebar({ rol }: { rol: Rol }) {
             )
           })}
       </nav>
-      <div className="px-6 py-4 text-xs text-gray-300">Vértice · v0.1</div>
+      <div className="px-5 py-4 text-[11px] text-gray-300">Vértice · v0.1</div>
     </aside>
   )
 }
