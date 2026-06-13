@@ -21,7 +21,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
     <div className="flex min-h-screen">
       <Sidebar rol={u.rol} />
       <div className="flex min-h-screen flex-1 flex-col">
-        <header className="flex h-14 items-center border-b border-gray-200 bg-white px-6">
+        <header className="flex h-14 items-center border-b border-gray-200 bg-white px-6 pl-16 lg:pl-6">
           <div className="ml-auto flex items-center gap-3">
             <button
               className="relative rounded-lg p-2 text-gray-500 transition hover:bg-gray-100"
@@ -44,7 +44,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
             </form>
           </div>
         </header>
-        <main className="flex-1 px-8 py-8">{children}</main>
+        <main className="flex-1 px-4 py-6 sm:px-8 sm:py-8">{children}</main>
       </div>
     </div>
   )
