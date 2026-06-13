@@ -26,6 +26,7 @@ export const colorRevision = pgEnum('color_revision', ['verde', 'amarillo', 'roj
 export const estadoReporte = pgEnum('estado_reporte', ['pendiente', 'enviado'])
 export const estadoContrato = pgEnum('estado_contrato', ['activo', 'pausado', 'finalizado'])
 export const plataformaRed = pgEnum('plataforma_red', ['facebook', 'instagram', 'tiktok', 'youtube', 'otro'])
+export const estadoPublicacion = pgEnum('estado_publicacion', ['idea', 'produccion', 'aprobado', 'publicado'])
 export const tipoNotificacion = pgEnum('tipo_notificacion', [
   'pieza_en_revision', 'pieza_decidida', 'reporte_recordatorio', 'reporte_recibido',
 ])
@@ -209,6 +210,21 @@ export const cuentas = pgTable('cuentas', {
   usuario: text('usuario').notNull(),
   url: text('url'),
   notas: text('notas'),
+  creadaEn: timestamp('creada_en', { withTimezone: true }).notNull().defaultNow(),
+})
+
+// Calendario editorial: publicaciones planificadas por cliente y fecha.
+export const publicaciones = pgTable('publicaciones', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  agenciaId: uuid('agencia_id').notNull().references(() => agencias.id),
+  clienteId: uuid('cliente_id').notNull().references(() => clientes.id),
+  fecha: date('fecha').notNull(),
+  titulo: text('titulo').notNull(),
+  red: plataformaRed('red'),
+  estado: estadoPublicacion('estado').notNull().default('idea'),
+  notas: text('notas'),
+  asignadoA: uuid('asignado_a').references(() => perfiles.id),
+  creadaPor: uuid('creada_por').notNull().references(() => perfiles.id),
   creadaEn: timestamp('creada_en', { withTimezone: true }).notNull().defaultNow(),
 })
 
