@@ -63,6 +63,7 @@ export default async function EditarContratoPage({ params }: { params: Promise<{
             ciudad: c.ciudad ?? '',
             contacto: c.contacto ?? '',
             telefono: c.telefono ?? '',
+            email: c.email ?? '',
             inicioContrato: c.inicioContrato ?? '',
             tarifaMensual: c.tarifaMensual ?? '',
             estadoContrato: c.estadoContrato,

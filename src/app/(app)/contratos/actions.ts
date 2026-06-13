@@ -2,6 +2,7 @@
 
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
+import { headers } from 'next/headers'
 import { and, eq, inArray } from 'drizzle-orm'
 import { db } from '@/db'
 import {
@@ -12,8 +13,10 @@ import {
   revisiones,
   respuestasChecklist,
   piezasReporte,
+  googleTokens,
 } from '@/db/schema'
 import { getUsuario } from '@/lib/dal'
+import { gmailCliente } from '@/lib/google'
 
 export type ContratoState = { ok?: true; error?: string } | null
 
@@ -32,6 +35,7 @@ function leerCampos(formData: FormData) {
     ciudad: s('ciudad'),
     contacto: s('contacto'),
     telefono: s('telefono'),
+    email: s('email'),
     inicioContrato: s('inicioContrato'),
     tarifaMensual: s('tarifaMensual'),
     estadoContrato: estado,
@@ -169,5 +173,54 @@ export async function generarEnlaceAprobacion(formData: FormData): Promise<void>
   if (!c[0].token) {
     await db.update(clientes).set({ tokenAprobacion: crypto.randomUUID() }).where(eq(clientes.id, clienteId))
   }
+  revalidatePath(`/contratos/${clienteId}`)
+}
+
+export async function enviarEnlaceAprobacion(formData: FormData): Promise<void> {
+  const u = await getUsuario()
+  if (!u || u.rol !== 'jefa') return
+  const clienteId = String(formData.get('clienteId') ?? '')
+  const para = String(formData.get('email') ?? '').trim()
+  if (!para) return
+
+  const cRows = await db
+    .select({ id: clientes.id, nombre: clientes.nombre, token: clientes.tokenAprobacion })
+    .from(clientes)
+    .where(and(eq(clientes.id, clienteId), eq(clientes.agenciaId, u.agenciaId)))
+    .limit(1)
+  const c = cRows[0]
+  if (!c) return
+  let token = c.token
+  if (!token) {
+    token = crypto.randomUUID()
+    await db.update(clientes).set({ tokenAprobacion: token }).where(eq(clientes.id, clienteId))
+  }
+
+  const tok = (
+    await db.select({ refreshToken: googleTokens.refreshToken }).from(googleTokens).where(eq(googleTokens.perfilId, u.id)).limit(1)
+  )[0]
+  if (!tok) return
+
+  const h = await headers()
+  const host = h.get('host') ?? 'localhost:3000'
+  const proto = host.includes('localhost') ? 'http' : 'https'
+  const link = `${proto}://${host}/aprobar/${token}`
+
+  const asunto = `Aprobación de contenido — ${c.nombre}`
+  const cuerpo = `Hola,\n\nTienes contenido listo para revisar y aprobar. Entra a este enlace (no necesitas cuenta):\n${link}\n\n¡Gracias!`
+  const raw = [
+    `To: ${para}`,
+    `Subject: =?UTF-8?B?${Buffer.from(asunto).toString('base64')}?=`,
+    'MIME-Version: 1.0',
+    'Content-Type: text/plain; charset=UTF-8',
+    '',
+    cuerpo,
+  ].join('\r\n')
+  const encoded = Buffer.from(raw).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+
+  try {
+    const gmail = gmailCliente(tok.refreshToken)
+    await gmail.users.messages.send({ userId: 'me', requestBody: { raw: encoded } })
+  } catch {}
   revalidatePath(`/contratos/${clienteId}`)
 }

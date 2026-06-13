@@ -8,7 +8,7 @@ import { clientes, cuentas, publicaciones, piezas, versionesPieza, asignacionesC
 import { urlsFirmadas } from '@/lib/storage'
 import { estadoMeta } from '@/lib/estados'
 import { formatoFecha, hoyISO } from '@/lib/fecha'
-import { generarEnlaceAprobacion } from '../actions'
+import { generarEnlaceAprobacion, enviarEnlaceAprobacion } from '../actions'
 import { CopyLink } from './CompartirAprobacion'
 
 const estadoContratoMeta: Record<string, { label: string; clase: string }> = {
@@ -132,6 +132,21 @@ export default async function ClienteHubPage({ params }: { params: Promise<{ id:
                 {pendientesCliente.length > 0 ? ` · ${pendientesCliente.length} esperando su visto bueno` : ''}.
               </p>
               <CopyLink token={c.tokenAprobacion} />
+              <form action={enviarEnlaceAprobacion} className="flex flex-wrap items-center gap-2 pt-1">
+                <input type="hidden" name="clienteId" value={c.id} />
+                <input
+                  name="email"
+                  type="email"
+                  required
+                  defaultValue={c.email ?? ''}
+                  placeholder="correo del dueño"
+                  className="min-w-0 flex-1 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:border-gray-400"
+                />
+                <button className="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-600 transition hover:bg-gray-50">
+                  Enviar por correo
+                </button>
+              </form>
+              <p className="text-xs text-gray-400">Enviar por correo requiere conectar Google (Contenido → Importar de Drive).</p>
             </div>
           ) : (
             <form action={generarEnlaceAprobacion}>

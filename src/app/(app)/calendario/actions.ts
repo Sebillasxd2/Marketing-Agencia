@@ -4,8 +4,9 @@ import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { and, eq } from 'drizzle-orm'
 import { db } from '@/db'
-import { publicaciones, clientes, asignacionesCliente } from '@/db/schema'
+import { publicaciones, clientes, asignacionesCliente, googleTokens } from '@/db/schema'
 import { getUsuario, type UsuarioActual } from '@/lib/dal'
+import { calendarCliente } from '@/lib/google'
 
 export type PubState = { error?: string } | null
 
@@ -117,4 +118,67 @@ export async function eliminarPublicacion(formData: FormData): Promise<void> {
   await db.delete(publicaciones).where(cond)
   revalidatePath('/calendario')
   redirect('/calendario')
+}
+
+function diaSiguiente(iso: string) {
+  const d = new Date(iso + 'T00:00:00')
+  d.setDate(d.getDate() + 1)
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
+/** Crea/actualiza en Google Calendar los eventos de las publicaciones del mes visible. */
+export async function sincronizarCalendario(formData: FormData): Promise<void> {
+  const u = await getUsuario()
+  if (!u) return
+  const mes = String(formData.get('mes') ?? '')
+  if (!/^\d{4}-\d{2}$/.test(mes)) return
+
+  const tok = (
+    await db.select({ refreshToken: googleTokens.refreshToken }).from(googleTokens).where(eq(googleTokens.perfilId, u.id)).limit(1)
+  )[0]
+  if (!tok) return
+
+  const accesibles =
+    u.rol === 'jefa'
+      ? await db.select({ id: clientes.id }).from(clientes).where(eq(clientes.agenciaId, u.agenciaId))
+      : await db
+          .select({ id: asignacionesCliente.clienteId })
+          .from(asignacionesCliente)
+          .where(and(eq(asignacionesCliente.agenciaId, u.agenciaId), eq(asignacionesCliente.empleadoId, u.id)))
+  const ids = new Set(accesibles.map((c) => c.id))
+
+  const todas = await db
+    .select({
+      id: publicaciones.id,
+      fecha: publicaciones.fecha,
+      titulo: publicaciones.titulo,
+      estado: publicaciones.estado,
+      notas: publicaciones.notas,
+      googleEventId: publicaciones.googleEventId,
+      clienteId: publicaciones.clienteId,
+      cliente: clientes.nombre,
+    })
+    .from(publicaciones)
+    .innerJoin(clientes, eq(clientes.id, publicaciones.clienteId))
+    .where(eq(publicaciones.agenciaId, u.agenciaId))
+  const pubs = todas.filter((p) => p.fecha.startsWith(mes) && ids.has(p.clienteId))
+
+  const cal = calendarCliente(tok.refreshToken)
+  for (const p of pubs) {
+    const evento = {
+      summary: `${p.cliente}: ${p.titulo}`,
+      description: `Vértice · estado: ${p.estado}${p.notas ? `\n${p.notas}` : ''}`,
+      start: { date: p.fecha },
+      end: { date: diaSiguiente(p.fecha) },
+    }
+    try {
+      if (p.googleEventId) {
+        await cal.events.update({ calendarId: 'primary', eventId: p.googleEventId, requestBody: evento })
+      } else {
+        const r = await cal.events.insert({ calendarId: 'primary', requestBody: evento })
+        if (r.data.id) await db.update(publicaciones).set({ googleEventId: r.data.id }).where(eq(publicaciones.id, p.id))
+      }
+    } catch {}
+  }
+  revalidatePath('/calendario')
 }

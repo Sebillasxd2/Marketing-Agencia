@@ -1,0 +1,1 @@
+ALTER TABLE "publicaciones" ADD COLUMN "google_event_id" text;

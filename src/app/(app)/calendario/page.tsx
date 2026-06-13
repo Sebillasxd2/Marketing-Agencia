@@ -1,10 +1,11 @@
 import Link from 'next/link'
 import { and, eq } from 'drizzle-orm'
-import { ChevronLeft, ChevronRight, Plus } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Plus, CalendarDays } from 'lucide-react'
 import { requireUsuario } from '@/lib/dal'
 import { db } from '@/db'
-import { publicaciones, clientes, asignacionesCliente } from '@/db/schema'
+import { publicaciones, clientes, asignacionesCliente, googleTokens } from '@/db/schema'
 import { hoyISO } from '@/lib/fecha'
+import { sincronizarCalendario } from './actions'
 
 const MESES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
 const DIAS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']
@@ -44,6 +45,8 @@ export default async function CalendarioPage({
           .where(and(eq(asignacionesCliente.agenciaId, u.agenciaId), eq(asignacionesCliente.empleadoId, u.id)))
   const idsDisp = new Set(clientesDisp.map((c) => c.id))
   const filtroCliente = sp.cliente && idsDisp.has(sp.cliente) ? sp.cliente : null
+  const conectado =
+    (await db.select({ id: googleTokens.id }).from(googleTokens).where(eq(googleTokens.perfilId, u.id)).limit(1)).length > 0
 
   const todas = await db
     .select({ id: publicaciones.id, fecha: publicaciones.fecha, titulo: publicaciones.titulo, estado: publicaciones.estado, clienteId: publicaciones.clienteId })
@@ -81,12 +84,29 @@ export default async function CalendarioPage({
           <h1 className="text-2xl font-semibold tracking-tight">Calendario</h1>
           <p className="mt-1 text-sm text-gray-500">Planea qué se publica y cuándo, por cliente.</p>
         </div>
-        <Link
-          href={`/calendario/nueva${filtroCliente ? `?cliente=${filtroCliente}` : ''}`}
-          className="ml-auto inline-flex items-center gap-2 rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-800"
-        >
-          <Plus size={16} /> Nueva publicación
-        </Link>
+        <div className="ml-auto flex flex-wrap gap-2">
+          {conectado ? (
+            <form action={sincronizarCalendario}>
+              <input type="hidden" name="mes" value={mesStr} />
+              <button className="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-50">
+                <CalendarDays size={16} /> Sincronizar con Google
+              </button>
+            </form>
+          ) : (
+            <a
+              href="/api/google/connect"
+              className="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-50"
+            >
+              <CalendarDays size={16} /> Conectar Google
+            </a>
+          )}
+          <Link
+            href={`/calendario/nueva${filtroCliente ? `?cliente=${filtroCliente}` : ''}`}
+            className="inline-flex items-center gap-2 rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-800"
+          >
+            <Plus size={16} /> Nueva publicación
+          </Link>
+        </div>
       </div>
 
       <div className="flex flex-wrap items-center gap-3">

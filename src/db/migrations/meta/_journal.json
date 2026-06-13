@@ -57,6 +57,20 @@
       "when": 1781381571642,
       "tag": "0007_flashy_ozymandias",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1781382133969,
+      "tag": "0008_faithful_red_wolf",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1781382176826,
+      "tag": "0009_worried_paibok",
+      "breakpoints": true
     }
   ]
 }

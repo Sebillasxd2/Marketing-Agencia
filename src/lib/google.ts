@@ -2,6 +2,8 @@ import { google } from 'googleapis'
 
 export const SCOPES = [
   'https://www.googleapis.com/auth/drive.readonly',
+  'https://www.googleapis.com/auth/calendar.events',
+  'https://www.googleapis.com/auth/gmail.send',
   'https://www.googleapis.com/auth/userinfo.email',
 ]
 
@@ -26,4 +28,16 @@ export function driveCliente(refreshToken: string) {
   const oauth = oauthClient()
   oauth.setCredentials({ refresh_token: refreshToken })
   return google.drive({ version: 'v3', auth: oauth })
+}
+
+export function calendarCliente(refreshToken: string) {
+  const oauth = oauthClient()
+  oauth.setCredentials({ refresh_token: refreshToken })
+  return google.calendar({ version: 'v3', auth: oauth })
+}
+
+export function gmailCliente(refreshToken: string) {
+  const oauth = oauthClient()
+  oauth.setCredentials({ refresh_token: refreshToken })
+  return google.gmail({ version: 'v1', auth: oauth })
 }

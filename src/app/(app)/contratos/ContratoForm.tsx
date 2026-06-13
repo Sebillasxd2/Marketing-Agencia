@@ -10,6 +10,7 @@ type Inicial = {
   ciudad?: string
   contacto?: string
   telefono?: string
+  email?: string
   inicioContrato?: string
   tarifaMensual?: string
   estadoContrato?: string
@@ -42,6 +43,9 @@ export function ContratoForm({ inicial = {}, id }: { inicial?: Inicial; id?: str
         </Campo>
         <Campo label="Teléfono / WhatsApp">
           <input name="telefono" defaultValue={inicial.telefono ?? ''} className={input} placeholder="+591…" />
+        </Campo>
+        <Campo label="Correo del dueño">
+          <input name="email" type="email" defaultValue={inicial.email ?? ''} className={input} placeholder="dueno@correo.com" />
         </Campo>
         <Campo label="Inicio de contrato">
           <input type="date" name="inicioContrato" defaultValue={inicial.inicioContrato ?? ''} className={input} />

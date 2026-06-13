@@ -75,6 +75,7 @@ export const clientes = pgTable('clientes', {
   ciudad: text('ciudad'),
   contacto: text('contacto'),
   telefono: text('telefono'),
+  email: text('email'),
   inicioContrato: date('inicio_contrato'),
   tarifaMensual: numeric('tarifa_mensual'),
   estadoContrato: estadoContrato('estado_contrato').notNull().default('activo'),
@@ -229,6 +230,7 @@ export const publicaciones = pgTable('publicaciones', {
   estado: estadoPublicacion('estado').notNull().default('idea'),
   notas: text('notas'),
   asignadoA: uuid('asignado_a').references(() => perfiles.id),
+  googleEventId: text('google_event_id'),
   creadaPor: uuid('creada_por').notNull().references(() => perfiles.id),
   creadaEn: timestamp('creada_en', { withTimezone: true }).notNull().defaultNow(),
 })
