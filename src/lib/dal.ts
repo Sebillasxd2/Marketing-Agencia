@@ -17,9 +17,13 @@ export type UsuarioActual = {
 /** Usuario autenticado + su rol/agencia. Memoizado por request con React.cache. */
 export const getUsuario = cache(async (): Promise<UsuarioActual | null> => {
   const supabase = await createClient()
+  // getSession() lee la sesión desde la cookie localmente (rápido, sin viaje de red);
+  // el proxy ya refrescó/escribió la cookie. Para producción multi-tenant con usuarios
+  // no confiables, volver a getUser() (validación en el servidor de auth).
   const {
-    data: { user },
-  } = await supabase.auth.getUser()
+    data: { session },
+  } = await supabase.auth.getSession()
+  const user = session?.user
   if (!user) return null
 
   const rows = await db

@@ -52,6 +52,8 @@ async function main() {
 
   console.log('· Limpiando tablas…')
   await db.delete(s.piezasReporte)
+  await db.delete(s.publicaciones)
+  await db.delete(s.cuentas)
   await db.delete(s.notificaciones)
   await db.delete(s.respuestasChecklist)
   await db.delete(s.revisiones)
@@ -85,6 +87,27 @@ async function main() {
   await db.insert(s.asignacionesCliente).values([
     { agenciaId: aid, clienteId: cliente.id, empleadoId: carla },
     { agenciaId: aid, clienteId: cliente.id, empleadoId: marco },
+  ])
+
+  console.log('· Insertando cuentas de redes…')
+  await db.insert(s.cuentas).values([
+    { agenciaId: aid, clienteId: cliente.id, plataforma: 'instagram', usuario: '@elpatiodelaabuela.sucre', url: 'https://instagram.com/elpatiodelaabuela.sucre' },
+    { agenciaId: aid, clienteId: cliente.id, plataforma: 'facebook', usuario: 'El Patio de la Abuela', url: null },
+    { agenciaId: aid, clienteId: cliente.id, plataforma: 'tiktok', usuario: '@elpatiodelaabuela', url: null },
+  ])
+
+  console.log('· Insertando publicaciones del calendario (mes actual)…')
+  const ahora = new Date()
+  const yy = ahora.getFullYear()
+  const mmes = String(ahora.getMonth() + 1).padStart(2, '0')
+  const dia = (d: number) => `${yy}-${mmes}-${String(d).padStart(2, '0')}`
+  await db.insert(s.publicaciones).values([
+    { agenciaId: aid, clienteId: cliente.id, fecha: dia(3), titulo: 'Reel salteñas — ritual de las 6 AM', red: 'instagram', estado: 'publicado', creadaPor: ale },
+    { agenciaId: aid, clienteId: cliente.id, fecha: dia(8), titulo: 'Carrusel menú Día de la Madre', red: 'facebook', estado: 'aprobado', creadaPor: carla, asignadoA: carla },
+    { agenciaId: aid, clienteId: cliente.id, fecha: dia(12), titulo: 'Foto parrilla + charango (sábado)', red: 'instagram', estado: 'produccion', creadaPor: marco, asignadoA: marco },
+    { agenciaId: aid, clienteId: cliente.id, fecha: dia(15), titulo: 'Video "8 años, 1 receta"', red: 'tiktok', estado: 'idea', creadaPor: ale },
+    { agenciaId: aid, clienteId: cliente.id, fecha: dia(20), titulo: 'Historia: "se acabaron las salteñas"', red: 'instagram', estado: 'idea', creadaPor: carla, asignadoA: carla },
+    { agenciaId: aid, clienteId: cliente.id, fecha: dia(26), titulo: 'Post Día de la Madre (el día)', red: 'facebook', estado: 'idea', creadaPor: ale },
   ])
 
   console.log('· Insertando checklists (estándar de la casa)…')

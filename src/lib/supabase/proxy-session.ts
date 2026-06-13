@@ -26,9 +26,13 @@ export async function updateSession(request: NextRequest) {
     },
   )
 
+  // getSession() es local (rápido) y refresca la cookie cuando hace falta;
+  // evita el viaje de ~1s a getUser() en cada navegación. Para producción multi-tenant
+  // con usuarios no confiables, volver a getUser().
   const {
-    data: { user },
-  } = await supabase.auth.getUser()
+    data: { session },
+  } = await supabase.auth.getSession()
+  const user = session?.user
 
   const path = request.nextUrl.pathname
   const protegidas = ['/dashboard', '/calendario', '/reportes', '/contratos', '/trabajadores', '/cuentas', '/estadisticas', '/contenido', '/ajustes']

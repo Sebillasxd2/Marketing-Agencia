@@ -19,19 +19,33 @@ export default async function DashboardPage() {
 }
 
 async function DashboardJefa({ u }: { u: UsuarioActual }) {
-  const todas = await db
-    .select({ clienteId: piezas.clienteId, estado: piezas.estado, versionActual: piezas.versionActual })
-    .from(piezas)
-    .where(eq(piezas.agenciaId, u.agenciaId))
+  // Todas las consultas en paralelo (un solo viaje de red en vez de cinco en fila).
+  const [todas, clientesList, cola, empleados, reportesHoy] = await Promise.all([
+    db
+      .select({ clienteId: piezas.clienteId, estado: piezas.estado, versionActual: piezas.versionActual })
+      .from(piezas)
+      .where(eq(piezas.agenciaId, u.agenciaId)),
+    db.select({ id: clientes.id, nombre: clientes.nombre }).from(clientes).where(eq(clientes.agenciaId, u.agenciaId)),
+    db
+      .select({ id: piezas.id, titulo: piezas.titulo, tipo: piezas.tipo, versionActual: piezas.versionActual, cliente: clientes.nombre })
+      .from(piezas)
+      .innerJoin(clientes, eq(clientes.id, piezas.clienteId))
+      .where(and(eq(piezas.agenciaId, u.agenciaId), eq(piezas.estado, 'en_revision')))
+      .orderBy(asc(piezas.creadaEn)),
+    db
+      .select({ id: perfiles.id, nombre: perfiles.nombreCompleto })
+      .from(miembrosAgencia)
+      .innerJoin(perfiles, eq(perfiles.id, miembrosAgencia.perfilId))
+      .where(and(eq(miembrosAgencia.agenciaId, u.agenciaId), eq(miembrosAgencia.rol, 'empleado'))),
+    db
+      .select({ empleadoId: reportesDiarios.empleadoId })
+      .from(reportesDiarios)
+      .where(and(eq(reportesDiarios.agenciaId, u.agenciaId), eq(reportesDiarios.fecha, hoyISO()))),
+  ])
 
   const cuenta = (e: string) => todas.filter((p) => p.estado === e).length
   const verdes = todas.filter((p) => p.estado === 'verde')
   const pctPrimer = verdes.length ? Math.round((verdes.filter((p) => p.versionActual === 1).length / verdes.length) * 100) : 0
-
-  const clientesList = await db
-    .select({ id: clientes.id, nombre: clientes.nombre })
-    .from(clientes)
-    .where(eq(clientes.agenciaId, u.agenciaId))
   const salud = clientesList.map((c) => {
     const ps = todas.filter((p) => p.clienteId === c.id)
     return {
@@ -41,23 +55,6 @@ async function DashboardJefa({ u }: { u: UsuarioActual }) {
       verde: ps.filter((p) => p.estado === 'verde').length,
     }
   })
-
-  const cola = await db
-    .select({ id: piezas.id, titulo: piezas.titulo, tipo: piezas.tipo, versionActual: piezas.versionActual, cliente: clientes.nombre })
-    .from(piezas)
-    .innerJoin(clientes, eq(clientes.id, piezas.clienteId))
-    .where(and(eq(piezas.agenciaId, u.agenciaId), eq(piezas.estado, 'en_revision')))
-    .orderBy(asc(piezas.creadaEn))
-
-  const empleados = await db
-    .select({ id: perfiles.id, nombre: perfiles.nombreCompleto })
-    .from(miembrosAgencia)
-    .innerJoin(perfiles, eq(perfiles.id, miembrosAgencia.perfilId))
-    .where(and(eq(miembrosAgencia.agenciaId, u.agenciaId), eq(miembrosAgencia.rol, 'empleado')))
-  const reportesHoy = await db
-    .select({ empleadoId: reportesDiarios.empleadoId })
-    .from(reportesDiarios)
-    .where(and(eq(reportesDiarios.agenciaId, u.agenciaId), eq(reportesDiarios.fecha, hoyISO())))
   const reporto = new Set(reportesHoy.map((r) => r.empleadoId))
 
   return (

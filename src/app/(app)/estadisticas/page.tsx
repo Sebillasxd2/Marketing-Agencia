@@ -6,21 +6,21 @@ import { piezas, reportesDiarios, miembrosAgencia, perfiles } from '@/db/schema'
 export default async function EstadisticasPage() {
   const u = await requireUsuario('jefa')
 
-  const empleados = await db
-    .select({ id: perfiles.id, nombre: perfiles.nombreCompleto })
-    .from(miembrosAgencia)
-    .innerJoin(perfiles, eq(perfiles.id, miembrosAgencia.perfilId))
-    .where(and(eq(miembrosAgencia.agenciaId, u.agenciaId), eq(miembrosAgencia.rol, 'empleado')))
-
-  const todas = await db
-    .select({ creadaPor: piezas.creadaPor, tipo: piezas.tipo, estado: piezas.estado, versionActual: piezas.versionActual })
-    .from(piezas)
-    .where(eq(piezas.agenciaId, u.agenciaId))
-
-  const reportes = await db
-    .select({ empleadoId: reportesDiarios.empleadoId, fecha: reportesDiarios.fecha })
-    .from(reportesDiarios)
-    .where(eq(reportesDiarios.agenciaId, u.agenciaId))
+  const [empleados, todas, reportes] = await Promise.all([
+    db
+      .select({ id: perfiles.id, nombre: perfiles.nombreCompleto })
+      .from(miembrosAgencia)
+      .innerJoin(perfiles, eq(perfiles.id, miembrosAgencia.perfilId))
+      .where(and(eq(miembrosAgencia.agenciaId, u.agenciaId), eq(miembrosAgencia.rol, 'empleado'))),
+    db
+      .select({ creadaPor: piezas.creadaPor, tipo: piezas.tipo, estado: piezas.estado, versionActual: piezas.versionActual })
+      .from(piezas)
+      .where(eq(piezas.agenciaId, u.agenciaId)),
+    db
+      .select({ empleadoId: reportesDiarios.empleadoId, fecha: reportesDiarios.fecha })
+      .from(reportesDiarios)
+      .where(eq(reportesDiarios.agenciaId, u.agenciaId)),
+  ])
 
   // Últimos 7 días.
   const hoy = new Date()

@@ -72,25 +72,26 @@ async function VistaEmpleado({ u }: { u: UsuarioActual }) {
 async function VistaJefa({ u }: { u: UsuarioActual }) {
   const fecha = hoyISO()
 
-  const empleados = await db
-    .select({ id: perfiles.id, nombre: perfiles.nombreCompleto })
-    .from(miembrosAgencia)
-    .innerJoin(perfiles, eq(perfiles.id, miembrosAgencia.perfilId))
-    .where(and(eq(miembrosAgencia.agenciaId, u.agenciaId), eq(miembrosAgencia.rol, 'empleado')))
-
-  const reportes = await db
-    .select({
-      id: reportesDiarios.id,
-      fecha: reportesDiarios.fecha,
-      queHice: reportesDiarios.queHice,
-      leido: reportesDiarios.leidoPorJefa,
-      empleadoId: reportesDiarios.empleadoId,
-      empleado: perfiles.nombreCompleto,
-    })
-    .from(reportesDiarios)
-    .innerJoin(perfiles, eq(perfiles.id, reportesDiarios.empleadoId))
-    .where(eq(reportesDiarios.agenciaId, u.agenciaId))
-    .orderBy(desc(reportesDiarios.fecha))
+  const [empleados, reportes] = await Promise.all([
+    db
+      .select({ id: perfiles.id, nombre: perfiles.nombreCompleto })
+      .from(miembrosAgencia)
+      .innerJoin(perfiles, eq(perfiles.id, miembrosAgencia.perfilId))
+      .where(and(eq(miembrosAgencia.agenciaId, u.agenciaId), eq(miembrosAgencia.rol, 'empleado'))),
+    db
+      .select({
+        id: reportesDiarios.id,
+        fecha: reportesDiarios.fecha,
+        queHice: reportesDiarios.queHice,
+        leido: reportesDiarios.leidoPorJefa,
+        empleadoId: reportesDiarios.empleadoId,
+        empleado: perfiles.nombreCompleto,
+      })
+      .from(reportesDiarios)
+      .innerJoin(perfiles, eq(perfiles.id, reportesDiarios.empleadoId))
+      .where(eq(reportesDiarios.agenciaId, u.agenciaId))
+      .orderBy(desc(reportesDiarios.fecha)),
+  ])
 
   const reportoHoy = new Set(reportes.filter((r) => r.fecha === fecha).map((r) => r.empleadoId))
 
