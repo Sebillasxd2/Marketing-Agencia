@@ -105,6 +105,8 @@ export const piezas = pgTable('piezas', {
   versionActual: integer('version_actual').notNull().default(1),
   produccionPara: text('produccion_para'),
   fechaProduccion: date('fecha_produccion'),
+  publicada: boolean('publicada').notNull().default(false),
+  enlacePublicacion: text('enlace_publicacion'),
   creadaPor: uuid('creada_por').notNull().references(() => perfiles.id),
   creadaEn: timestamp('creada_en', { withTimezone: true }).notNull().defaultNow(),
   actualizadaEn: timestamp('actualizada_en', { withTimezone: true }).notNull().defaultNow(),
