@@ -8,6 +8,8 @@ import { clientes, cuentas, publicaciones, piezas, versionesPieza, asignacionesC
 import { urlsFirmadas } from '@/lib/storage'
 import { estadoMeta } from '@/lib/estados'
 import { formatoFecha, hoyISO } from '@/lib/fecha'
+import { generarEnlaceAprobacion } from '../actions'
+import { CopyLink } from './CompartirAprobacion'
 
 const estadoContratoMeta: Record<string, { label: string; clase: string }> = {
   activo: { label: 'Activo', clase: 'bg-green-100 text-green-700' },
@@ -80,6 +82,14 @@ export default async function ClienteHubPage({ params }: { params: Promise<{ id:
   }
   const firmadas = await urlsFirmadas(Object.values(miniMap).filter((p): p is string => !!p))
 
+  const pendientesCliente =
+    u.rol === 'jefa'
+      ? await db
+          .select({ id: piezas.id })
+          .from(piezas)
+          .where(and(eq(piezas.clienteId, id), eq(piezas.agenciaId, u.agenciaId), eq(piezas.estado, 'verde'), eq(piezas.aprobadaCliente, false)))
+      : []
+
   const em = estadoContratoMeta[c.estadoContrato]
 
   return (
@@ -112,6 +122,27 @@ export default async function ClienteHubPage({ params }: { params: Promise<{ id:
         <Accion href={`/calendario/nueva?cliente=${c.id}`} label="Nueva publicación" Icon={CalendarPlus} />
         <Accion href="/cuentas/nueva" label="Nueva cuenta" Icon={AtSign} />
       </div>
+
+      {u.rol === 'jefa' && (
+        <Panel titulo="Aprobación del cliente">
+          {c.tokenAprobacion ? (
+            <div className="space-y-2">
+              <p className="text-sm text-gray-500">
+                Comparte este enlace con el dueño del negocio para que apruebe o pida cambios — sin cuenta
+                {pendientesCliente.length > 0 ? ` · ${pendientesCliente.length} esperando su visto bueno` : ''}.
+              </p>
+              <CopyLink token={c.tokenAprobacion} />
+            </div>
+          ) : (
+            <form action={generarEnlaceAprobacion}>
+              <input type="hidden" name="clienteId" value={c.id} />
+              <button className="rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-800">
+                Generar enlace de aprobación
+              </button>
+            </form>
+          )}
+        </Panel>
+      )}
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Panel titulo="Próximas publicaciones" verHref="/calendario">

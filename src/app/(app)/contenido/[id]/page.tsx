@@ -29,6 +29,8 @@ export default async function ContenidoDetallePage({ params }: { params: Promise
         produccionPara: piezas.produccionPara,
         publicada: piezas.publicada,
         enlacePublicacion: piezas.enlacePublicacion,
+        aprobadaCliente: piezas.aprobadaCliente,
+        comentarioCliente: piezas.comentarioCliente,
         cliente: clientes.nombre,
         autor: perfiles.nombreCompleto,
         creadaPor: piezas.creadaPor,
@@ -96,6 +98,9 @@ export default async function ContenidoDetallePage({ params }: { params: Promise
             <span className={`h-1.5 w-1.5 rounded-full ${m.punto}`} />
             {m.label}
           </span>
+          {p.aprobadaCliente && (
+            <span className="rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-700">Aprobado por cliente</span>
+          )}
           {p.publicada && (
             <span className="bg-brand-soft text-brand rounded-full px-2.5 py-0.5 text-xs font-medium">Publicado</span>
           )}
@@ -133,6 +138,12 @@ export default async function ContenidoDetallePage({ params }: { params: Promise
           </>
         )}
       </p>
+
+      {p.comentarioCliente && p.estado === 'amarillo' && (
+        <div className="rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          💬 El cliente pidió cambios: «{p.comentarioCliente}»
+        </div>
+      )}
 
       {/* Gate de checklist (borrador) */}
       {p.estado === 'borrador' && (esAutor || u.rol === 'jefa') && (

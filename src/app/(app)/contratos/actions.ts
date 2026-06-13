@@ -155,3 +155,19 @@ export async function quitarEmpleado(formData: FormData): Promise<void> {
     )
   revalidatePath(`/contratos/${clienteId}`)
 }
+
+export async function generarEnlaceAprobacion(formData: FormData): Promise<void> {
+  const u = await getUsuario()
+  if (!u || u.rol !== 'jefa') return
+  const clienteId = String(formData.get('clienteId') ?? '')
+  const c = await db
+    .select({ token: clientes.tokenAprobacion })
+    .from(clientes)
+    .where(and(eq(clientes.id, clienteId), eq(clientes.agenciaId, u.agenciaId)))
+    .limit(1)
+  if (!c[0]) return
+  if (!c[0].token) {
+    await db.update(clientes).set({ tokenAprobacion: crypto.randomUUID() }).where(eq(clientes.id, clienteId))
+  }
+  revalidatePath(`/contratos/${clienteId}`)
+}
