@@ -233,6 +233,16 @@ export const publicaciones = pgTable('publicaciones', {
   creadaEn: timestamp('creada_en', { withTimezone: true }).notNull().defaultNow(),
 })
 
+// Tokens de Google (Drive) por usuario, para importar contenido desde su Drive.
+export const googleTokens = pgTable('google_tokens', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  agenciaId: uuid('agencia_id').notNull().references(() => agencias.id),
+  perfilId: uuid('perfil_id').notNull().references(() => perfiles.id),
+  email: text('email'),
+  refreshToken: text('refresh_token').notNull(),
+  creadoEn: timestamp('creado_en', { withTimezone: true }).notNull().defaultNow(),
+})
+
 // ── Tipos inferidos (comodidad para la app) ──────────────────────────────
 export type Agencia = typeof agencias.$inferSelect
 export type Perfil = typeof perfiles.$inferSelect

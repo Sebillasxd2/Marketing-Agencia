@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { and, desc, eq, inArray } from 'drizzle-orm'
-import { Upload, Image as ImageIcon, Film } from 'lucide-react'
+import { Upload, Cloud, Image as ImageIcon, Film } from 'lucide-react'
 import { requireUsuario } from '@/lib/dal'
 import { db } from '@/db'
 import { piezas, versionesPieza, clientes, perfiles } from '@/db/schema'
@@ -67,12 +67,20 @@ export default async function ContenidoPage() {
             {u.rol === 'jefa' ? 'Todo el contenido del equipo, por organización y fecha.' : 'Tu contenido, por organización y fecha.'}
           </p>
         </div>
-        <Link
-          href="/contenido/subir"
-          className="ml-auto inline-flex items-center gap-2 rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-800"
-        >
-          <Upload size={16} /> Subir contenido
-        </Link>
+        <div className="ml-auto flex flex-wrap gap-2">
+          <Link
+            href="/contenido/importar"
+            className="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-50"
+          >
+            <Cloud size={16} /> Importar de Drive
+          </Link>
+          <Link
+            href="/contenido/subir"
+            className="inline-flex items-center gap-2 rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-800"
+          >
+            <Upload size={16} /> Subir contenido
+          </Link>
+        </div>
       </div>
 
       {items.length === 0 ? (

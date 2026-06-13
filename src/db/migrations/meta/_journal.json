@@ -50,6 +50,13 @@
       "when": 1781376462008,
       "tag": "0006_purple_dormammu",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1781381571642,
+      "tag": "0007_flashy_ozymandias",
+      "breakpoints": true
     }
   ]
 }
